@@ -41,4 +41,5 @@ services:
       nutrition-service:
         condition: service-started
 
-volumes: mysql-data
+volumes:
+  mysql-data:
