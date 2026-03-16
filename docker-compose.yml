@@ -37,9 +37,9 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       mysql:
-        condition: service-healthy
+        condition: service_healthy
       nutrition-service:
-        condition: service-started
+        condition: service_started
 
 volumes:
   mysql-data:
