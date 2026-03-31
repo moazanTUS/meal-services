@@ -1,0 +1,339 @@
+﻿<!doctype html>
+<html lang='en'>
+
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>GymFuel - Meal Prep Tracker</title>
+    <link rel='preconnect' href='https://fonts.googleapis.com'>
+    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap' rel='stylesheet'>
+    <link rel='stylesheet' href='styles.css'>
+</head>
+
+<body>
+    <header>
+        <div class='header-content'>
+            <div class='logo'>
+                <span class='logo-icon'>&#9861;</span>
+                <div>
+                    <h1>GYMFUEL</h1>
+                    <p class='subtitle'>Meal Prep Tracker</p>
+                </div>
+            </div>
+            <div class='header-status'>
+                <div id='cacheInfo' class='cache-info'>
+                    <span id='httpStatus' class='http-badge'></span>
+                    <span id='etagDisplay' class='etag-info'></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class='container'>
+
+            <section id='statusSection' class='status-bar'>
+                <div id='statusMessage' class='status-message'>Ready</div>
+                <button id='refreshBtn' class='btn-primary'>
+                    <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor'
+                        stroke-width='2.5'>
+                        <path d='M23 4v6h-6' />
+                        <path d='M1 20v-6h6' />
+                        <path d='M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15' />
+                    </svg>
+                    Refresh
+                </button>
+                <button id='deleteAllBtn' class='btn-danger'>
+                    <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor'
+                        stroke-width='2.5'>
+                        <polyline points='3 6 5 6 21 6' />
+                        <path d='M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2' />
+                    </svg>
+                    Delete All
+                </button>
+            </section>
+
+            <section id='detailSection' class='detail-panel hidden'>
+                <div class='card'>
+                    <div class='detail-header'>
+                        <h2>
+                            <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor'
+                                stroke-width='2'>
+                                <path d='M12 20V10' />
+                                <path d='M18 20V4' />
+                                <path d='M6 20v-4' />
+                            </svg>
+                            Nutrition Breakdown
+                        </h2>
+                        <button type='button' id='closeDetailBtn' class='btn-ghost'>&times;</button>
+                    </div>
+                    <div id='detailContent'></div>
+                </div>
+            </section>
+
+            <div class='content-wrapper'>
+                <section id='tableSection' class='section-left'>
+                    <div class='card'>
+                        <h2>
+                            <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor'
+                                stroke-width='2'>
+                                <rect x='3' y='4' width='18' height='18' rx='2' ry='2' />
+                                <line x1='16' y1='2' x2='16' y2='6' />
+                                <line x1='8' y1='2' x2='8' y2='6' />
+                                <line x1='3' y1='10' x2='21' y2='10' />
+                            </svg>
+                            Your Meal Plans
+                        </h2>
+                        <table id='mealPlanTable'>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Athlete</th>
+                                    <th>Meal</th>
+                                    <th>Food</th>
+                                    <th>Servings</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id='formSection' class='section-right'>
+                    <div class='card'>
+                        <h2>
+                            <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor'
+                                stroke-width='2'>
+                                <line x1='12' y1='5' x2='12' y2='19' />
+                                <line x1='5' y1='12' x2='19' y2='12' />
+                            </svg>
+                            Add Meal Plan
+                        </h2>
+                        <form id='mealPlanForm'>
+                            <input type='hidden' id='mealPlanId' value=''>
+                            <div class='form-group'>
+                                <label for='userName'>Athlete Name</label>
+                                <input id='userName' type='text' placeholder='e.g. King' required>
+                            </div>
+                            <div class='form-group'>
+                                <label for='mealType'>Meal Type</label>
+                                <input id='mealType' type='text' placeholder='Breakfast, Lunch, Dinner...' required>
+                            </div>
+                            <div class='form-group'>
+                                <label for='foodId'>Select Food</label>
+                                <select id='foodId' required>
+                                    <option value=''>Loading foods...</option>
+                                </select>
+                            </div>
+                            <div class='form-group'>
+                                <label for='servings'>Servings</label>
+                                <input id='servings' type='number' min='1' placeholder='2' required>
+                            </div>
+                            <div class='form-group'>
+                                <label for='planDate'>Plan Date</label>
+                                <input id='planDate' type='date' required>
+                            </div>
+                            <div class='form-actions'>
+                                <button type='submit' id='submitBtn' class='btn-accent'>Add Plan</button>
+                                <button type='button' id='cancelEditBtn' class='btn-ghost hidden'>Cancel</button>
+                            </div>
+                        </form>
+
+                        <div id='editFormWrapper' class='hidden'>
+                            <div class='form-divider'></div>
+                            <h2>
+                                <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor'
+                                    stroke-width='2'>
+                                    <path d='M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7' />
+                                    <path d='M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z' />
+                                </svg>
+                                Edit Meal Plan
+                            </h2>
+                            <form id='editForm'>
+                                <input type='hidden' id='editMealPlanId' value=''>
+                                <div class='form-group'>
+                                    <label for='editUserName'>Athlete Name</label>
+                                    <input id='editUserName' type='text'>
+                                </div>
+                                <div class='form-group'>
+                                    <label for='editMealType'>Meal Type</label>
+                                    <input id='editMealType' type='text'>
+                                </div>
+                                <div class='form-group'>
+                                    <label for='editFoodId'>Select Food</label>
+                                    <select id='editFoodId'>
+                                        <option value=''>Loading foods...</option>
+                                    </select>
+                                </div>
+                                <div class='form-group'>
+                                    <label for='editServings'>Servings</label>
+                                    <input id='editServings' type='number' min='1'>
+                                </div>
+                                <div class='form-group'>
+                                    <label for='editPlanDate'>Plan Date</label>
+                                    <input id='editPlanDate' type='date'>
+                                </div>
+                                <div class='form-actions'>
+                                    <button type='submit' id='editSubmitBtn' class='btn-accent'>Update</button>
+                                    <button type='button' id='editCancelBtn' class='btn-ghost'>Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ===== FOOD MANAGEMENT SECTION ===== -->
+            <section id='foodSection' class='food-management'>
+                <div class='section-divider'>
+                    <span class='divider-label'>
+                        <svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor'
+                            stroke-width='2'>
+                            <path d='M18 8h1a4 4 0 010 8h-1' />
+                            <path d='M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z' />
+                            <line x1='6' y1='1' x2='6' y2='4' />
+                            <line x1='10' y1='1' x2='10' y2='4' />
+                            <line x1='14' y1='1' x2='14' y2='4' />
+                        </svg>
+                        Food Database
+                    </span>
+                </div>
+                <div class='content-wrapper'>
+                    <section class='section-left'>
+                        <div class='card'>
+                            <div class='section-heading'>
+                                <h2>
+                                    <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor'
+                                        stroke-width='2'>
+                                        <path d='M18 8h1a4 4 0 010 8h-1' />
+                                        <path d='M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z' />
+                                        <line x1='6' y1='1' x2='6' y2='4' />
+                                        <line x1='10' y1='1' x2='10' y2='4' />
+                                        <line x1='14' y1='1' x2='14' y2='4' />
+                                    </svg>
+                                    All Foods
+                                </h2>
+                                <div class='cache-info section-cache'>
+                                    <span id='foodHttpStatus' class='http-badge'></span>
+                                    <span id='foodEtagDisplay' class='etag-info'></span>
+                                </div>
+                            </div>
+                            <table id='foodTable'>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Calories</th>
+                                        <th>P / C / F</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </section>
+                    <section class='section-right'>
+                        <div class='card'>
+                            <h2>
+                                <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor'
+                                    stroke-width='2'>
+                                    <line x1='12' y1='5' x2='12' y2='19' />
+                                    <line x1='5' y1='12' x2='19' y2='12' />
+                                </svg>
+                                Add Food
+                            </h2>
+                            <form id='addFoodForm'>
+                                <div class='form-group'>
+                                    <label for='foodName'>Food Name</label>
+                                    <input id='foodName' type='text' placeholder='e.g. Chicken Breast' required>
+                                </div>
+                                <div class='form-group'>
+                                    <label for='foodCategory'>Category</label>
+                                    <input id='foodCategory' type='text'
+                                        placeholder='Protein, Carbohydrate, Healthy Fat...' required>
+                                </div>
+                                <div class='form-row-2col'>
+                                    <div class='form-group'>
+                                        <label for='foodCalories'>Calories / serving</label>
+                                        <input id='foodCalories' type='number' min='0' placeholder='165' required>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label for='foodProtein'>Protein (g)</label>
+                                        <input id='foodProtein' type='number' min='0' placeholder='31' required>
+                                    </div>
+                                </div>
+                                <div class='form-row-2col'>
+                                    <div class='form-group'>
+                                        <label for='foodCarbs'>Carbs (g)</label>
+                                        <input id='foodCarbs' type='number' min='0' placeholder='0' required>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label for='foodFat'>Fat (g)</label>
+                                        <input id='foodFat' type='number' min='0' placeholder='4' required>
+                                    </div>
+                                </div>
+                                <div class='form-actions'>
+                                    <button type='submit' id='addFoodBtn' class='btn-accent'>Add Food</button>
+                                </div>
+                            </form>
+
+                            <div id='editFoodWrapper' class='hidden'>
+                                <div class='form-divider'></div>
+                                <h2>
+                                    <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor'
+                                        stroke-width='2'>
+                                        <path d='M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7' />
+                                        <path d='M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z' />
+                                    </svg>
+                                    Edit Food
+                                </h2>
+                                <form id='editFoodForm'>
+                                    <input type='hidden' id='editFoodIdField' value=''>
+                                    <div class='form-group'>
+                                        <label for='editFoodName'>Food Name</label>
+                                        <input id='editFoodName' type='text' required>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label for='editFoodCategory'>Category</label>
+                                        <input id='editFoodCategory' type='text' required>
+                                    </div>
+                                    <div class='form-row-2col'>
+                                        <div class='form-group'>
+                                            <label for='editFoodCalories'>Calories / serving</label>
+                                            <input id='editFoodCalories' type='number' min='0' required>
+                                        </div>
+                                        <div class='form-group'>
+                                            <label for='editFoodProtein'>Protein (g)</label>
+                                            <input id='editFoodProtein' type='number' min='0' required>
+                                        </div>
+                                    </div>
+                                    <div class='form-row-2col'>
+                                        <div class='form-group'>
+                                            <label for='editFoodCarbs'>Carbs (g)</label>
+                                            <input id='editFoodCarbs' type='number' min='0' required>
+                                        </div>
+                                        <div class='form-group'>
+                                            <label for='editFoodFat'>Fat (g)</label>
+                                            <input id='editFoodFat' type='number' min='0' required>
+                                        </div>
+                                    </div>
+                                    <div class='form-actions'>
+                                        <button type='submit' id='editFoodBtn' class='btn-accent'>Update Food</button>
+                                        <button type='button' id='cancelEditFoodBtn' class='btn-ghost'>Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </div>
+    </main>
+    <script src='app.js'></script>
+</body>
+
+</html>
