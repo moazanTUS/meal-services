@@ -1,21 +1,38 @@
-version: "2.2"
-
 services:
-  mysql:
+  mysql-mealplan:
     image: mysql:8.0
-    container_name: mysql
+    container_name: mysql-mealplan
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mealplandb
     ports:
       - "3307:3306"
     volumes:
-      - mysql-data:/var/lib/mysql
-      - ./mysql-init:/docker-entrypoint-initdb.d
+      - mysql-mealplan-data:/var/lib/mysql
+      - ./mysql-init-mealplan:/docker-entrypoint-initdb.d
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpassword" ]
       interval: 10s
       timeout: 5s
       retries: 10
+
+  mysql-nutrition:
+    image: mysql:8.0
+    container_name: mysql-nutrition
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: nutritiondb
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql-nutrition-data:/var/lib/mysql
+      - ./mysql-init-nutrition:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpassword" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   nutrition-service:
     build: ./nutrition-service
     ports:
@@ -23,8 +40,11 @@ services:
     environment:
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-nutrition:3306/nutritiondb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
     depends_on:
-      mysql:
+      mysql-nutrition:
         condition: service_healthy
 
   mealplan-service:
@@ -35,11 +55,15 @@ services:
       - SERVER_PORT=8080
       - NUTRITIONSERVICE_SERVICE_URL=http://nutrition-service:8080
       - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-mealplan:3306/mealplandb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
     depends_on:
-      mysql:
+      mysql-mealplan:
         condition: service_healthy
       nutrition-service:
         condition: service_started
 
 volumes:
-  mysql-data:
+  mysql-mealplan-data:
+  mysql-nutrition-data:
