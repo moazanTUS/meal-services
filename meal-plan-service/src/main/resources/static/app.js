@@ -88,7 +88,7 @@ function escapeHtml(val) {
     return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-async function loadMealPlans({ refresh = false } = {}) {
+async function loadMealPlans({ refresh = false, showStatus = true } = {}) {
     refreshBtn.disabled = true;
     try {
         const headers = {};
@@ -99,14 +99,18 @@ async function loadMealPlans({ refresh = false } = {}) {
         const response = await fetch(API_BASE, { headers });
 
         if (response.status === 304) {
-            updateStatus('No changes. Data is fresh (304 Not Modified).', 'warn', 304);
+            if (showStatus) {
+                updateStatus('No changes. Data is fresh (304 Not Modified).', 'warn', 304);
+            }
             updateEtagDisplay(currentEtag);
             refreshBtn.disabled = false;
             return;
         }
 
         if (!response.ok) {
-            updateStatus(`Request failed: ${response.status} ${response.statusText}`, 'error', response.status);
+            if (showStatus) {
+                updateStatus(`Request failed: ${response.status} ${response.statusText}`, 'error', response.status);
+            }
             refreshBtn.disabled = false;
             return;
         }
@@ -115,9 +119,13 @@ async function loadMealPlans({ refresh = false } = {}) {
         currentEtag = response.headers.get('ETag');
         renderTable(data);
         updateEtagDisplay(currentEtag);
-        updateStatus(`Loaded ${data.length} meal plans. Fresh data retrieved.`, 'ok', 200);
+        if (showStatus) {
+            updateStatus(`Loaded ${data.length} meal plans. Fresh data retrieved.`, 'ok', 200);
+        }
     } catch (err) {
-        updateStatus('Error: ' + err.message, 'error');
+        if (showStatus) {
+            updateStatus('Error: ' + err.message, 'error');
+        }
     } finally {
         refreshBtn.disabled = false;
     }
@@ -177,9 +185,9 @@ mealPlanForm.addEventListener('submit', async (ev) => {
         }
 
         const result = await response.json();
-        updateStatus(`Meal plan created successfully (ID: ${result.id})`, 'ok', 200);
+        updateStatus(`Meal plan created successfully (ID: ${result.id})`, 'ok', response.status);
         setFormForAdd();
-        await loadMealPlans({ refresh: true });
+        await loadMealPlans({ refresh: true, showStatus: false });
     } catch (e) {
         updateStatus('Error: ' + e.message, 'error');
     } finally {
@@ -219,9 +227,9 @@ editForm.addEventListener('submit', async (ev) => {
         }
 
         const result = await response.json();
-        updateStatus(`Meal plan updated successfully (ID: ${result.id})`, 'ok', 200);
+        updateStatus(`Meal plan updated successfully (ID: ${result.id})`, 'ok', response.status);
         setFormForAdd();
-        await loadMealPlans({ refresh: true });
+        await loadMealPlans({ refresh: true, showStatus: false });
     } catch (e) {
         updateStatus('Error: ' + e.message, 'error');
     } finally {
@@ -277,10 +285,10 @@ async function deleteMealPlan(id) {
             updateStatus(`Failed to delete meal plan: ${response.status}`, 'error', response.status);
             return;
         }
-        updateStatus(`Meal plan #${id} deleted.`, 'ok', 200);
+        updateStatus(`Meal plan #${id} deleted.`, 'ok', response.status);
         detailSection.classList.add('hidden');
         currentEtag = null;
-        await loadMealPlans({ refresh: true });
+        await loadMealPlans({ refresh: true, showStatus: false });
     } catch (e) {
         updateStatus('Error: ' + e.message, 'error');
     }
@@ -293,10 +301,10 @@ async function deleteAllMealPlans() {
             updateStatus(`Failed to delete all: ${response.status}`, 'error', response.status);
             return;
         }
-        updateStatus('All meal plans deleted.', 'ok', 200);
+        updateStatus('All meal plans deleted.', 'ok', response.status);
         detailSection.classList.add('hidden');
         currentEtag = null;
-        await loadMealPlans({ refresh: true });
+        await loadMealPlans({ refresh: true, showStatus: false });
     } catch (e) {
         updateStatus('Error: ' + e.message, 'error');
     }
@@ -510,7 +518,7 @@ addFoodForm.addEventListener('submit', async (ev) => {
             return;
         }
         const created = await response.json();
-        updateStatus(`Food "${created.foodName}" created (ID: ${created.id})`, 'ok', 201);
+        updateStatus(`Food "${created.foodName}" created (ID: ${created.id})`, 'ok', response.status);
         addFoodForm.reset();
         foodCollectionEtag = null;
         await refreshFoodsView({ refresh: true });
@@ -570,7 +578,7 @@ editFoodForm.addEventListener('submit', async (ev) => {
             return;
         }
         const updated = await response.json();
-        updateStatus(`Food "${updated.foodName}" updated.`, 'ok', 200);
+        updateStatus(`Food "${updated.foodName}" updated.`, 'ok', response.status);
         hideEditFoodForm();
         foodCollectionEtag = null;
         await refreshFoodsView({ refresh: true });
@@ -589,7 +597,7 @@ async function deleteFood(id) {
             updateStatus(`Failed to delete food: ${response.status}`, 'error', response.status);
             return;
         }
-        updateStatus(`Food #${id} deleted.`, 'ok', 200);
+        updateStatus(`Food #${id} deleted.`, 'ok', response.status);
         foodCollectionEtag = null;
         await refreshFoodsView({ refresh: true });
     } catch (e) {

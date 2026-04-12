@@ -166,23 +166,6 @@ public class MealPlanController {
         }
     }
 
-    private String generateEtagForMealPlanResponse(MealPlanResponse response) {
-        String content = String.join("|",
-                String.valueOf(response.getId()),
-                String.valueOf(response.getUserName()),
-                String.valueOf(response.getMealType()),
-                String.valueOf(response.getFoodId()),
-                String.valueOf(response.getServings()),
-                String.valueOf(response.getPlanDate()),
-                String.valueOf(response.getFoodName()),
-                String.valueOf(response.getCategory()),
-                String.valueOf(response.getCaloriesPerServing()),
-                String.valueOf(response.getProtein()),
-                String.valueOf(response.getCarbs()),
-                String.valueOf(response.getFat()));
-        return generateEtag(content);
-    }
-
     private boolean isEtagMatch(String ifNoneMatch, String currentEtag) {
         String normalizedTarget = normalizeEtag(currentEtag);
         String[] tokens = ifNoneMatch.split(",");
